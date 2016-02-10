@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     lineEditUrl = new QLineEdit("http://www.mosecom.ru/air/air-today/station/spirid/table.html");
     textEditData = new QTextEdit;
     pushButtonGet = new QPushButton("Get");
+	pushButtonGet->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(pushButtonGet, SIGNAL(clicked()), this, SLOT(request()));
 
     manager = new QNetworkAccessManager();
