@@ -11,7 +11,8 @@
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QPushButton>
-
+#include <QTreeWidget>
+#include <QTimer>
 
 class MainWindow : public QMainWindow
 {
@@ -24,6 +25,8 @@ public:
 private slots:
     void request();
     void getData();
+    void error(QNetworkReply::NetworkError);
+    void timeout();
 
 private:
     QNetworkAccessManager *manager;
@@ -32,6 +35,11 @@ private:
     QLineEdit *lineEditUrl;
     QTextEdit *textEditData;
     QPushButton *pushButtonGet;
+    QTreeWidget *treeWidgetFiles;
+
+     QList<QTreeWidgetItem *> items;
+     QTimer *timer;
+
 };
 
 #endif // MAINWINDOW_H
