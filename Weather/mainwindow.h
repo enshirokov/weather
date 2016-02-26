@@ -3,11 +3,6 @@
 
 #include <QMainWindow>
 
-#include <QtNetwork/QNetworkAccessManager>
-#include <QUrl>
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QNetworkReply>
-
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QPushButton>
@@ -28,9 +23,9 @@ public:
     ~MainWindow();
 
 private slots:
-    void request();
+    //void request();
     void getData();
-    void error(QNetworkReply::NetworkError);
+   // void error(QNetworkReply::NetworkError);
     void timeout();
     void quit();
 
@@ -48,8 +43,6 @@ private:
     QAction* openAct;
     QAction* saveAct;
     QAction* quitAct;
-
-
 
     QNetworkAccessManager *manager;
     QNetworkReply *response;

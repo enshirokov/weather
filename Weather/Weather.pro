@@ -13,8 +13,10 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    downloadmanager.cpp
 
 HEADERS  += mainwindow.h \
-    stationinfo.h
+    stationinfo.h \
+    downloadmanager.h
 
