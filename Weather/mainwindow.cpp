@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QDir>
 #include <QTreeWidgetItem>
+#include <QMenuBar>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -39,12 +40,82 @@ MainWindow::MainWindow(QWidget *parent) :
 
     timer->start(1000);
 
+    createActions();
+    createMenus();
+    createToolBar();
+
 
 }
 
 MainWindow::~MainWindow()
 {
 }
+
+void MainWindow::createActions()
+{
+    openAct = new QAction(QIcon(":/images/images/open.png"), tr("&Open"), this);
+    openAct->setShortcuts(QKeySequence::New);
+    openAct->setStatusTip(tr("Open file"));
+    //connect(openAct, &QAction::triggered, this, &MainWindow::openFile);
+
+    saveAct = new QAction(QIcon(":/images/images/save.png"), tr("&Save"), this);
+    saveAct->setShortcuts(QKeySequence::New);
+    saveAct->setStatusTip(tr("Open file"));
+    //connect(saveAct, &QAction::triggered, this, &MainWindow::save);
+
+    quitAct = new QAction(tr("&Quit"), this);
+    quitAct->setShortcuts(QKeySequence::Quit);
+    quitAct->setStatusTip(tr("Quit"));
+    connect(quitAct, &QAction::triggered, this, &MainWindow::quit);
+
+}
+
+void MainWindow::createMenus()
+{
+    this->menuBar()->setNativeMenuBar(false);
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(openAct);
+    fileMenu->addAction(saveAct);
+    fileMenu->addSeparator();
+    fileMenu->addAction(quitAct);
+
+    toolMenu = menuBar()->addMenu(tr("&Tools"));
+}
+
+void MainWindow::createToolBar()
+{
+    QList<QToolBar *> allToolBars = this->findChildren<QToolBar *>();
+    foreach(QToolBar *tb, allToolBars) {
+        // This does not delete the tool bar.
+        this->removeToolBar(tb);
+    }
+
+    fileToolBar = addToolBar(tr("File"));
+    fileToolBar->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
+    fileToolBar->addAction(openAct);
+    fileToolBar->addAction(saveAct);
+    fileToolBar->addSeparator();
+
+
+}
+
+void MainWindow::createCentralWidget()
+{
+
+    QHBoxLayout* layout = new QHBoxLayout;
+    //layout->addWidget(view, 1);
+   //layout->addWidget(tabWidget);
+
+    this->centralWidget()->setLayout(layout);
+
+}
+
+void MainWindow::quit()
+{
+    this->close();
+}
+//-----------------------------------
+
 
 void MainWindow::request()
 {
@@ -72,8 +143,9 @@ void MainWindow::getData()
 {
     QString text = response->readAll();
 
-    QTextCodec *codec = QTextCodec::codecForName("windows-1251");
 
+    QTextCodec *codec = QTextCodec::codecForName("windows-1251");
+    text = codec->toUnicode(text.toLocal8Bit().data());
     //textEditData->setPlainText(codec->toUnicode(text.toLocal8Bit()));
     textEditData->setHtml(text);
     //textEditData->setPlainText(text);

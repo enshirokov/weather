@@ -13,6 +13,11 @@
 #include <QPushButton>
 #include <QTreeWidget>
 #include <QTimer>
+#include <QAction>
+#include <QMenu>
+#include <QToolBar>
+
+static const int ICON_SIZE = 64;
 
 class MainWindow : public QMainWindow
 {
@@ -27,8 +32,25 @@ private slots:
     void getData();
     void error(QNetworkReply::NetworkError);
     void timeout();
+    void quit();
 
 private:
+    void createActions();           // create actions
+    void createMenus();             // create menus
+    void createToolBar();           // create toolbar
+    void createCentralWidget();     // create central widget
+
+private:
+    QMenu* fileMenu;
+    QMenu* toolMenu;
+    QToolBar* fileToolBar;
+
+    QAction* openAct;
+    QAction* saveAct;
+    QAction* quitAct;
+
+
+
     QNetworkAccessManager *manager;
     QNetworkReply *response;
 
