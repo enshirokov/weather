@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     treeWidgetFiles = new QTreeWidget;
     treeWidgetFiles->setColumnCount(1);
+    treeWidgetFiles->setHeaderLabel("History");
    // treeWidgetFiles->insertTopLevelItems(0, items);
 
     manager = new QNetworkAccessManager();
@@ -70,13 +71,10 @@ void MainWindow::timeout()
 
 void MainWindow::getData()
 {
-    QString text = response->readAll();
+    QByteArray rawData = response->readAll();
 
-    QTextCodec *codec = QTextCodec::codecForName("windows-1251");
-
-    //textEditData->setPlainText(codec->toUnicode(text.toLocal8Bit()));
+    QString text = QTextCodec::codecForName("cp1251")->toUnicode(rawData);
     textEditData->setHtml(text);
-    //textEditData->setPlainText(text);
 
     QString timeText = QDateTime::currentDateTime().toString("HH:mm:ss");
 
@@ -99,9 +97,6 @@ void MainWindow::getData()
 
     dateItem->addChild(timeItem);
 
-
-
-    //items.append(osloItem);
 
 }
 
