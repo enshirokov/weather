@@ -6,11 +6,34 @@
 #include <QFile>
 #include <QDir>
 #include <QTreeWidgetItem>
+#include <QMenuBar>
+#include <QThread>
 
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
+    QThread *thread = new QThread;
+    downloadManager = new DownloadManager;
+    downloadManager->moveToThread(thread);
+
+    connect(this, SIGNAL(getTables(QVector<StationInfo*>&)), downloadManager, SLOT(getTables(QVector<StationInfo*>&)));
+    connect(downloadManager, SIGNAL(done()), this, SLOT(getData()));
+
+    thread->start();
+
+    StationInfo *info1 = new StationInfo;
+    info1->name = "Name 1";
+    info1->url = "http://www.mosecom.ru/air/air-today/station/spirid/table.html";
+    stationInfoList.push_back(info1);
+
+    StationInfo *info2 = new StationInfo;
+    info2->name = "Name 2";
+    info2->url = "http://www.mosecom.ru/air/air-today/station/spirid/table.html";
+    stationInfoList.push_back(info2);
+
+    emit getTables(stationInfoList);
+
     lineEditUrl = new QLineEdit("http://www.mosecom.ru/air/air-today/station/spirid/table.html");
     textEditData = new QTextEdit;
     pushButtonGet = new QPushButton("Get");
@@ -22,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     treeWidgetFiles->setHeaderLabel("History");
    // treeWidgetFiles->insertTopLevelItems(0, items);
 
-    manager = new QNetworkAccessManager();
+    //manager = new QNetworkAccessManager();
 
     QGridLayout* layout = new QGridLayout;
     layout->addWidget(lineEditUrl, 0, 0, 1, 2);
@@ -40,67 +63,123 @@ MainWindow::MainWindow(QWidget *parent) :
 
     timer->start(1000);
 
+    createActions();
+    createMenus();
+    createToolBar();
+
 
 }
 
 MainWindow::~MainWindow()
 {
+    QThread *thread = downloadManager->thread();
+
+    if(thread != this->thread()) {
+        thread->quit();
+        thread->wait();
+        delete thread;
+    }
+
+    delete downloadManager;
+
 }
 
-void MainWindow::request()
+void MainWindow::createActions()
 {
-    QString url = lineEditUrl->text();
-    response = manager->get(QNetworkRequest(QUrl(url)));
-    connect(response,SIGNAL(finished()),this,SLOT(getData()));
-    connect(response, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
+    openAct = new QAction(QIcon(":/images/images/open.png"), tr("&Open"), this);
+    openAct->setShortcuts(QKeySequence::New);
+    openAct->setStatusTip(tr("Open file"));
+    //connect(openAct, &QAction::triggered, this, &MainWindow::openFile);
+
+    saveAct = new QAction(QIcon(":/images/images/save.png"), tr("&Save"), this);
+    saveAct->setShortcuts(QKeySequence::New);
+    saveAct->setStatusTip(tr("Open file"));
+    //connect(saveAct, &QAction::triggered, this, &MainWindow::save);
+
+    quitAct = new QAction(tr("&Quit"), this);
+    quitAct->setShortcuts(QKeySequence::Quit);
+    quitAct->setStatusTip(tr("Quit"));
+    connect(quitAct, &QAction::triggered, this, &MainWindow::quit);
+
 }
 
-void MainWindow::timeout()
+void MainWindow::createMenus()
 {
-    disconnect(timer, SIGNAL(timeout()), this, SLOT(timeout()));
+    this->menuBar()->setNativeMenuBar(false);
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(openAct);
+    fileMenu->addAction(saveAct);
+    fileMenu->addSeparator();
+    fileMenu->addAction(quitAct);
 
-    QString dateText = QDateTime::currentDateTime().date().toString("dd:MM:yyyy");
-
-    QTreeWidgetItem *dateItem = new QTreeWidgetItem(treeWidgetFiles);
-    dateItem->setText(0, dateText);
-
-    treeWidgetFiles->addTopLevelItem(dateItem);
-
-    request();
+    toolMenu = menuBar()->addMenu(tr("&Tools"));
 }
+
+void MainWindow::createToolBar()
+{
+    QList<QToolBar *> allToolBars = this->findChildren<QToolBar *>();
+    foreach(QToolBar *tb, allToolBars) {
+        // This does not delete the tool bar.
+        this->removeToolBar(tb);
+    }
+
+    fileToolBar = addToolBar(tr("File"));
+    fileToolBar->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
+    fileToolBar->addAction(openAct);
+    fileToolBar->addAction(saveAct);
+    fileToolBar->addSeparator();
+
+
+}
+
+void MainWindow::createCentralWidget()
+{
+
+    QHBoxLayout* layout = new QHBoxLayout;
+    //layout->addWidget(view, 1);
+   //layout->addWidget(tabWidget);
+
+    this->centralWidget()->setLayout(layout);
+
+}
+
+void MainWindow::quit()
+{
+    this->close();
+}
+//-----------------------------------
+
+
+//void MainWindow::request()
+//{
+//    QString url = lineEditUrl->text();
+//    response = manager->get(QNetworkRequest(QUrl(url)));
+//    connect(response,SIGNAL(finished()),this,SLOT(getData()));
+//    connect(response, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
+//}
+
 
 void MainWindow::getData()
 {
-    QByteArray rawData = response->readAll();
+    QTreeWidgetItem *dateItem = new QTreeWidgetItem(treeWidgetFiles);
+    dateItem->setText(0, stationInfoList[0]->date);
 
-    QString text = QTextCodec::codecForName("cp1251")->toUnicode(rawData);
-    textEditData->setHtml(text);
+    treeWidgetFiles->addTopLevelItem(dateItem);
 
-    QString timeText = QDateTime::currentDateTime().toString("HH:mm:ss");
-
-    QString path = QDir::homePath() + "/Weather/" + timeText + ".weather";
-    QFile file(path);
-    if (!file.open(QIODevice::WriteOnly)) {
-        qDebug() << "error open file";
-            return;
-    }
-
-    file.write(text.toLocal8Bit().data());
-    file.close();
-
-
+    /*
     int index = treeWidgetFiles->topLevelItemCount();
     QTreeWidgetItem *dateItem = treeWidgetFiles->topLevelItem(index - 1);
 
     QTreeWidgetItem *timeItem = new QTreeWidgetItem();
-    timeItem->setText(0, timeText);
+    //timeItem->setText(0, timeText);
 
     dateItem->addChild(timeItem);
+    */
 
 
 }
 
-void MainWindow::error(QNetworkReply::NetworkError code)
-{
-    qDebug() << QString("error %1").arg(code);
-}
+//void MainWindow::error(QNetworkReply::NetworkError code)
+//{
+//    qDebug() << QString("error %1").arg(code);
+//}
