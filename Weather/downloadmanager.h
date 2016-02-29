@@ -21,7 +21,8 @@ signals:
     void done();
 
 public slots:
-   void getTables(QVector<StationInfo*>&);
+   void getTables(QVector<StationInfo*>);
+   void init();
 
 private slots:
     void request();
@@ -34,6 +35,8 @@ private:
 
     QVector<StationInfo*> stationInfoList;
     QVector<StationInfo*>::iterator stationInfoIter;
+
+    QString dateText;
 
 
 };

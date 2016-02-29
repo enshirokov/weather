@@ -28,7 +28,8 @@ public:
     ~MainWindow();
 
 signals:
-    void getTables(QVector<StationInfo*>&);
+    void getTables(QVector<StationInfo*>);
+    void init();
 
 private slots:
     //void request();

@@ -2,10 +2,11 @@
 #include <QUrl>
 #include <QTextCodec>
 #include <QDir>
+#include <QDateTime>
 
 DownloadManager::DownloadManager(QObject *parent) : QObject(parent)
 {
-    manager = new QNetworkAccessManager();
+
 }
 
 DownloadManager::~DownloadManager()
@@ -17,13 +18,18 @@ DownloadManager::~DownloadManager()
         delete response;
 }
 
-void DownloadManager::getTables(QVector<StationInfo*>& list)
+void DownloadManager::init()
+{
+    manager = new QNetworkAccessManager();
+}
+
+void DownloadManager::getTables(QVector<StationInfo*> list)
 {
     stationInfoList = list;
     stationInfoIter = list.begin();
 
     QString timeText = QDateTime::currentDateTime().toString("dd:MM:yyyy");
-    (*stationInfoIter)->date = timeText;
+    dateText = timeText;
 
     request();
 }
@@ -47,7 +53,7 @@ void DownloadManager::getData()
 
     QString text = QTextCodec::codecForName("cp1251")->toUnicode(rawData);
 
-    QString path = QDir::homePath() + "/Weather/" + (*stationInfoIter)->date + "/" + (*stationInfoIter)->name + ".weather";
+    QString path = QDir::homePath() + "/Weather/" + dateText + "/" + (*stationInfoIter)->name + ".weather";
 
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly)) {

@@ -17,10 +17,14 @@ MainWindow::MainWindow(QWidget *parent) :
     downloadManager = new DownloadManager;
     downloadManager->moveToThread(thread);
 
-    connect(this, SIGNAL(getTables(QVector<StationInfo*>&)), downloadManager, SLOT(getTables(QVector<StationInfo*>&)));
+    qRegisterMetaType<QVector<StationInfo*> >("QVector<StationInfo*>");
+    connect(this, SIGNAL(getTables(QVector<StationInfo*>)), downloadManager, SLOT(getTables(QVector<StationInfo*>)), Qt::QueuedConnection);
+    connect(this, SIGNAL(init()), downloadManager, SLOT(init()));
     connect(downloadManager, SIGNAL(done()), this, SLOT(getData()));
 
     thread->start();
+
+    emit init();
 
     StationInfo *info1 = new StationInfo;
     info1->name = "Name 1";
@@ -38,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     textEditData = new QTextEdit;
     pushButtonGet = new QPushButton("Get");
 	pushButtonGet->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    connect(pushButtonGet, SIGNAL(clicked()), this, SLOT(request()));
+    //connect(pushButtonGet, SIGNAL(clicked()), this, SLOT(request()));
 
     treeWidgetFiles = new QTreeWidget;
     treeWidgetFiles->setColumnCount(1);
@@ -58,10 +62,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setCentralWidget(centralWgt);
 
-    timer = new QTimer;
-    connect(timer, SIGNAL(timeout()), this, SLOT(timeout()));
+    //timer = new QTimer;
+    //connect(timer, SIGNAL(timeout()), this, SLOT(timeout()));
 
-    timer->start(1000);
+    //timer->start(1000);
 
     createActions();
     createMenus();
@@ -99,7 +103,7 @@ void MainWindow::createActions()
     quitAct = new QAction(tr("&Quit"), this);
     quitAct->setShortcuts(QKeySequence::Quit);
     quitAct->setStatusTip(tr("Quit"));
-    connect(quitAct, &QAction::triggered, this, &MainWindow::quit);
+    connect(quitAct, SIGNAL(triggered()), this, SLOT(quit()));
 
 }
 
