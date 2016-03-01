@@ -18,10 +18,10 @@ public:
     ~DownloadManager();
 
 signals:
-    void done();
+    void done(quint64);
 
 public slots:
-   void getTables(QVector<StationInfo*>);
+   void getTables(WeatherItem*);
    void init();
 
 private slots:
@@ -33,11 +33,11 @@ private:
     QNetworkAccessManager *manager;
     QNetworkReply *response;
 
-    QVector<StationInfo*> stationInfoList;
-    QVector<StationInfo*>::iterator stationInfoIter;
+    //QVector<StationInfo*> stationInfoList;
+    //QVector<StationInfo*>::iterator stationInfoIter;
 
-    QString dateText;
-
+    WeatherItem *_item;
+    int _index;
 
 };
 

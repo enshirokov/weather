@@ -23,25 +23,24 @@ void DownloadManager::init()
     manager = new QNetworkAccessManager();
 }
 
-void DownloadManager::getTables(QVector<StationInfo*> list)
+void DownloadManager::getTables(WeatherItem* item)
 {
-    stationInfoList = list;
-    stationInfoIter = list.begin();
+    _item = item;
+    _index = 0;
 
-    QString timeText = QDateTime::currentDateTime().toString("dd:MM:yyyy");
-    dateText = timeText;
+    _item->date = QDateTime::currentDateTime().toString("dd:MM:yyyy");
 
     request();
 }
 
 void DownloadManager::request()
 {
-    if(stationInfoIter == stationInfoList.end()){
-        emit done();
+    if(_index >= _item->stations.size()){
+        emit done(_item->id);
         return;
     }
 
-    QUrl url = QUrl((*stationInfoIter)->url);
+    QUrl url = QUrl(_item->stations[_index].url);
     response = manager->get(QNetworkRequest(url));
     connect(response,SIGNAL(finished()),this,SLOT(getData()));
     connect(response, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
@@ -53,19 +52,21 @@ void DownloadManager::getData()
 
     QString text = QTextCodec::codecForName("cp1251")->toUnicode(rawData);
 
-    QString path = QDir::homePath() + "/Weather/" + dateText + "/" + (*stationInfoIter)->name + ".weather";
+    QString path = QDir::homePath() + "/Weather/" + _item->date + "/" + _item->stations[_index].name + ".weather";
 
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly)) {
         QString error = "error open file";
-        (*stationInfoIter)->error = error;
+        _item->stations[_index].error = error;
         return;
     }
 
     file.write(text.toLocal8Bit().data());
     file.close();
 
-    (*stationInfoIter)->path = path;
+    _item->stations[_index].path = path;
+
+    _index++;
 
     request();
 }
@@ -73,6 +74,6 @@ void DownloadManager::getData()
 void DownloadManager::error(QNetworkReply::NetworkError code)
 {
     QString error = QString("error %1").arg(code);
-    (*stationInfoIter)->error = error;
+    _item->stations[_index].error = error;
 }
 

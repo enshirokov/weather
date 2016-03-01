@@ -166,7 +166,7 @@ void MainWindow::quit()
 void MainWindow::getData()
 {
     QTreeWidgetItem *dateItem = new QTreeWidgetItem(treeWidgetFiles);
-    dateItem->setText(0, stationInfoList[0]->date);
+    //dateItem->setText(0, stationInfoList[0]->date);
 
     treeWidgetFiles->addTopLevelItem(dateItem);
 
