@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/database.png</file>
+        <file>images/timer.png</file>
+    </qresource>
+</RCC>

@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QVector>
+#include <QDataStream>
 
 struct StationInfo
 {
@@ -10,6 +11,23 @@ struct StationInfo
     QString url;     // url откуда брать таблицу
     QString path;    // путь к файлу с сохраненной таблицей
     QString error;   // ошибка
+
+    void read(QDataStream &dataStream)
+    {
+        dataStream >> name;
+        dataStream >> url;
+        dataStream >> path;
+        dataStream >> error;
+    }
+
+    void write(QDataStream &dataStream)
+    {
+        dataStream << name;
+        dataStream << url;
+        dataStream << path;
+        dataStream << error;
+    }
+
 };
 
 struct WeatherItem

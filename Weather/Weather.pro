@@ -14,9 +14,18 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    downloadmanager.cpp
+    downloadmanager.cpp \
+    databasewidget.cpp \
+    stationinfowidget.cpp \
+    timerwidget.cpp
 
 HEADERS  += mainwindow.h \
     stationinfo.h \
-    downloadmanager.h
+    downloadmanager.h \
+    databasewidget.h \
+    stationinfowidget.h \
+    timerwidget.h
+
+RESOURCES += \
+    images.qrc
 

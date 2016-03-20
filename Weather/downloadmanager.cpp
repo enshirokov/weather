@@ -16,6 +16,8 @@ DownloadManager::~DownloadManager()
 
     if(response != NULL)
         delete response;
+
+    qDebug() << "~DownloadManager()";
 }
 
 void DownloadManager::init()
@@ -28,7 +30,7 @@ void DownloadManager::getTables(WeatherItem* item)
     _item = item;
     _index = 0;
 
-    _item->date = QDateTime::currentDateTime().toString("dd:MM:yyyy");
+    //_item->date = QDateTime::currentDateTime().toString("dd:MM:yyyy");
 
     request();
 }
@@ -52,7 +54,13 @@ void DownloadManager::getData()
 
     QString text = QTextCodec::codecForName("cp1251")->toUnicode(rawData);
 
-    QString path = QDir::homePath() + "/Weather/" + _item->date + "/" + _item->stations[_index].name + ".weather";
+    QString path = QDir::homePath() + "/Weather/" + _item->date;
+    QDir dir(path);
+    if(!dir.mkpath(path)){
+        qDebug() << "create dir failed";
+    }
+
+    path += QString("/" + _item->stations[_index].name + ".weather");
 
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly)) {

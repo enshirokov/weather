@@ -12,10 +12,15 @@
 #include <QMenu>
 #include <QToolBar>
 
+#include <QSettings>
+
 #include <QVector>
 
 #include "downloadmanager.h"
 #include "stationinfo.h"
+
+#include "databasewidget.h"
+#include "timerwidget.h"
 
 static const int ICON_SIZE = 64;
 
@@ -28,43 +33,53 @@ public:
     ~MainWindow();
 
 signals:
-    void getTables(QVector<StationInfo*>);
+    void getTables(WeatherItem*);
     void init();
 
 private slots:
     //void request();
-    void getData();
+    void addData(quint64);
    // void error(QNetworkReply::NetworkError);
     void quit();
+    void openDataBase(bool);
+    void openTimer(bool);
+    void timeout();
+    void store();
+    void restore();
+    void itemClicked(QTreeWidgetItem*,int);
 
 private:
     void createActions();           // create actions
     void createMenus();             // create menus
     void createToolBar();           // create toolbar
     void createCentralWidget();     // create central widget
+    void storeSettings();
+    void restoreSettings();
 
 private:
     QMenu* fileMenu;
     QMenu* toolMenu;
-    QToolBar* fileToolBar;
+    QToolBar* toolBar;
 
-    QAction* openAct;
-    QAction* saveAct;
+    QAction* dbAct;
+    QAction* timerAct;
     QAction* quitAct;
 
     //QNetworkAccessManager *manager;
     //QNetworkReply *response;
 
-    QLineEdit *lineEditUrl;
     QTextEdit *textEditData;
-    QPushButton *pushButtonGet;
     QTreeWidget *treeWidgetFiles;
 
     QList<QTreeWidgetItem *> items;
     QTimer *timer;
 
-    QVector<StationInfo*> stationInfoList;
+    QVector<StationInfo> _stationInfoList;
+    QMap<quint64, WeatherItem*> _weatherItemList;
     DownloadManager *downloadManager;
+
+    QString path;
+
 
 };
 
